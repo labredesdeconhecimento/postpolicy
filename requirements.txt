@@ -1,0 +1,3 @@
+pydns-2.3.6
+multiprocessing-2.6.2.1
+python-daemon-1.6

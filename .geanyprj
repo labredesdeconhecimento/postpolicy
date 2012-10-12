@@ -1,7 +1,0 @@
-[project]
-name=PostPolicy
-description=
-base_path=./
-run_cmd=/home/ronaldoalves/projects/labpython/bin/python
-regenerate=true
-type=Python

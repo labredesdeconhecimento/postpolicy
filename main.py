@@ -1,9 +1,8 @@
 #!/usr/bin/python
-#coding: utf-8 
+#coding: utf-8
 
 from lib.postpolicy import Policy
 import sys
-
 
 if __name__ == '__main__':
     daemon = Policy('/tmp/policy.pid',

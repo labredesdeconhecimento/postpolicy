@@ -1,0 +1,32 @@
+.. PostPolicy documentation master file, created by
+   sphinx-quickstart on Fri Oct 12 17:18:57 2012.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+.. _Postfix: http://www.postfix.org/
+.. _SenderScore: http://www.senderscore.org/
+
+Bem vindo a documentação do projeto PostPolicy
+==============================================
+
+Este projeto, trabalho final do curso *Python para Administradores de Redes Linux*,
+busca implementar um servidor de políticas de acesso para o servidor Postfix_. Através
+de informações de reputação do endereço IP de um servidor SMTP remetente obtidas por meio 
+de consultas a partir do serviço SenderScore_, que variam com valores entre 0 e 100, 
+são definidos o número de emails que poderão ser entregues em um período de 1 hora.
+Expirado este tempo a contagem é retomada em 0, criando-se assim um meio de evitar o 
+desperdício de recursos caso sofra-se excessos a partir de um servidor SMTP comprometido.
+
+Conteúdo:
+
+.. toctree::
+   :maxdepth: 2
+
+   modules
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+

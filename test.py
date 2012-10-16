@@ -1,4 +1,6 @@
+#!/usr/bin/python
 #coding: utf-8
+
 from lib.postpolicy import SenderScore
 import datetime
 import time
@@ -31,15 +33,10 @@ encryption_cipher=DHE-RSA-AES256-SHA
 encryption_keysize=256
 
     '''
+    print 'lala'
     base = SenderScore('local.db')
-    #print base.get_reputation('200.202.246.144')
+    #print base.get_reputation('200.202.246.144')# unipac
     #print base.get_reputation('200.243.63.174')# funjob
-    #print base.get_reputation('189.124.16.8')#net-rosas
-    #for x in xrange(1000):
-    #    print base.action(data)
-    #    print base.action('200.243.63.174')
-    print base.action(data)
-    #print base.action('200.243.63.174')
-    #print base.get_sender('200.202.246.144')
-    #ip, count, expire = base.get_sender('200.202.246.144')
-    #print datetime.datetime.fromtimestamp(expire),expire
+    #print base.get_reputation('189.124.16.8')# net-rosas
+    for x in xrange(1000):
+        print base.action(data)

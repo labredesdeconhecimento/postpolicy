@@ -1,0 +1,8 @@
+PostPolicy
+==========
+
+.. toctree::
+   :maxdepth: 4
+
+   lib
+   main

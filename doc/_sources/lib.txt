@@ -1,0 +1,35 @@
+Pacote lib
+==========
+
+Pacote :mod:`lib` 
+-----------------
+
+.. automodule:: lib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Módulo :mod:`daemon`
+--------------------
+
+.. automodule:: lib.daemon
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Módulo :mod:`postpolicy` 
+------------------------
+
+.. automodule:: lib.postpolicy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Módulo :mod:`settings`
+----------------------
+
+.. automodule:: lib.settings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

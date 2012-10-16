@@ -1,0 +1,449 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Pacote lib &mdash; PostPolicy b1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     'b1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PostPolicy b1 documentation" href="index.html" />
+    <link rel="up" title="PostPolicy" href="modules.html" />
+    <link rel="next" title="Modulo main" href="main.html" />
+    <link rel="prev" title="PostPolicy" href="modules.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navegação</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="Índice Geral"
+             accesskey="I">índice</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Índice de Módulos do Python"
+             >módulos</a> |</li>
+        <li class="right" >
+          <a href="main.html" title="Modulo main"
+             accesskey="N">próximo</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="PostPolicy"
+             accesskey="P">anterior</a> |</li>
+        <li><a href="index.html">PostPolicy b1 documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">PostPolicy</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pacote-lib">
+<h1>Pacote lib<a class="headerlink" href="#pacote-lib" title="Link permanente para este título">¶</a></h1>
+<div class="section" id="id1">
+<h2>Pacote <a class="reference internal" href="#module-lib" title="lib"><tt class="xref py py-mod docutils literal"><span class="pre">lib</span></tt></a><a class="headerlink" href="#id1" title="Link permanente para este título">¶</a></h2>
+<span class="target" id="module-lib"></span></div>
+<div class="section" id="module-lib.daemon">
+<span id="modulo-daemon"></span><h2>Módulo <tt class="xref py py-mod docutils literal"><span class="pre">daemon</span></tt><a class="headerlink" href="#module-lib.daemon" title="Link permanente para este título">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Plataforma:</th><td class="field-body">*nix</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Sinopse:</th><td class="field-body">Módulo disponível em <a class="reference external" href="http://www.jejik.com/articles/2007/02/a_simple_unix_linux_daemon_in_python/">Jejik</a> que implementa uma classe para criação de um Daemon utilizando <a class="reference external" href="http://www.python.org/">Python</a>. Seu autor, Sander Marechal, liberou seu uso soblicença Creative Commons.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="codigo">
+<h3>Código<a class="headerlink" href="#codigo" title="Link permanente para este título">¶</a></h3>
+<dl class="class">
+<dt id="lib.daemon.Daemon">
+<em class="property">class </em><tt class="descclassname">lib.daemon.</tt><tt class="descname">Daemon</tt><big>(</big><em>pidfile</em>, <em>stdin='/dev/null'</em>, <em>stdout='/dev/null'</em>, <em>stderr='/dev/null'</em><big>)</big><a class="reference internal" href="_modules/lib/daemon.html#Daemon"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.daemon.Daemon" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>A generic daemon class.</p>
+<p>Usage: subclass the Daemon class and override the run() method</p>
+<dl class="method">
+<dt id="lib.daemon.Daemon.daemonize">
+<tt class="descname">daemonize</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/daemon.html#Daemon.daemonize"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.daemon.Daemon.daemonize" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>do the UNIX double-fork magic, see Stevens&#8217; &#8220;Advanced
+Programming in the UNIX Environment&#8221; for details (ISBN 0201563177)
+<a class="reference external" href="http://www.erlenstar.demon.co.uk/unix/faq_2.html#SEC16">http://www.erlenstar.demon.co.uk/unix/faq_2.html#SEC16</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.daemon.Daemon.delpid">
+<tt class="descname">delpid</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/daemon.html#Daemon.delpid"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.daemon.Daemon.delpid" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Delete pid file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.daemon.Daemon.restart">
+<tt class="descname">restart</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/daemon.html#Daemon.restart"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.daemon.Daemon.restart" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Restart the daemon</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.daemon.Daemon.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/daemon.html#Daemon.run"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.daemon.Daemon.run" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>You should override this method when you subclass Daemon. It will be
+called after the process has been daemonized by start() or restart().</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.daemon.Daemon.start">
+<tt class="descname">start</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/daemon.html#Daemon.start"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.daemon.Daemon.start" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Start the daemon</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.daemon.Daemon.status">
+<tt class="descname">status</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/daemon.html#Daemon.status"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.daemon.Daemon.status" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Verify the daemon status.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.daemon.Daemon.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/daemon.html#Daemon.stop"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.daemon.Daemon.stop" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Stop the daemon</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-lib.postpolicy">
+<span id="modulo-postpolicy"></span><h2>Módulo <tt class="xref py py-mod docutils literal"><span class="pre">postpolicy</span></tt><a class="headerlink" href="#module-lib.postpolicy" title="Link permanente para este título">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Plataforma:</th><td class="field-body">*nix</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Sinopse:</th><td class="field-body">Módulo que possui praticamente todo o código desenvolvido para uso do Daemon. Existem três classes que gerenciam a alma da solução.</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li>A classe <a class="reference internal" href="#lib.postpolicy.Worker" title="lib.postpolicy.Worker"><tt class="xref py py-class docutils literal"><span class="pre">Worker</span></tt></a>, que controla as threads utilizadas pela classe <a class="reference internal" href="#lib.postpolicy.Policy" title="lib.postpolicy.Policy"><tt class="xref py py-class docutils literal"><span class="pre">Policy</span></tt></a>.</li>
+<li>A classe <a class="reference internal" href="#lib.postpolicy.Policy" title="lib.postpolicy.Policy"><tt class="xref py py-class docutils literal"><span class="pre">Policy</span></tt></a>, reescreve o método <a class="reference internal" href="#lib.daemon.Daemon.run" title="lib.daemon.Daemon.run"><tt class="xref py py-meth docutils literal"><span class="pre">lib.daemon.Daemon.run()</span></tt></a> da classe <a class="reference internal" href="#lib.daemon.Daemon" title="lib.daemon.Daemon"><tt class="xref py py-class docutils literal"><span class="pre">lib.daemon.Daemon</span></tt></a> e define o que deve ser feito quando o Daemon inicia.</li>
+<li>A classe <a class="reference internal" href="#lib.postpolicy.SenderScore" title="lib.postpolicy.SenderScore"><tt class="xref py py-class docutils literal"><span class="pre">SenderScore</span></tt></a>, faz toda a avaliação do servidor que está enviando a mensagem (um servidor SMTP) e define uma ação para o mesmo. Esta ação quando passada a um servidor Postfix garante a entrega do email ou a emissão de um erro temporário.</li>
+</ul>
+<div class="section" id="id2">
+<h3>Código<a class="headerlink" href="#id2" title="Link permanente para este título">¶</a></h3>
+<dl class="class">
+<dt id="lib.postpolicy.Policy">
+<em class="property">class </em><tt class="descclassname">lib.postpolicy.</tt><tt class="descname">Policy</tt><big>(</big><em>pidfile</em>, <em>stdin='/dev/null'</em>, <em>stdout='/dev/null'</em>, <em>stderr='/dev/null'</em><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#Policy"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.Policy" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lib.daemon.Daemon" title="lib.daemon.Daemon"><tt class="xref py py-class docutils literal"><span class="pre">lib.daemon.Daemon</span></tt></a></p>
+<p>Classe que extende <a class="reference internal" href="#lib.daemon.Daemon" title="lib.daemon.Daemon"><tt class="xref py py-class docutils literal"><span class="pre">lib.daemon.Daemon</span></tt></a> e que define    as operações básicas para o Daemon. Ações como parar, iniciar, verificar    o estado e outros são realizados.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parâmetros:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pidfile</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; arquivo que guarda o pid do processo.</li>
+<li><strong>stdin</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; valor que especifica o caminho do arquivo que guardará    informações a serem passadas como entrada para o Daemon.</li>
+<li><strong>stdout</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; valor que especifica o caminho do arquivo que guardará    informações de saída do Daemon.</li>
+<li><strong>stderr</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; valor que especifica o caminho do arquivo que guardará    informações de saída de erro do Daemon.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="lib.postpolicy.Policy.checkconfig">
+<tt class="descname">checkconfig</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#Policy.checkconfig"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.Policy.checkconfig" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método para tratar os valores e a integridade das variáveis definidas
+no módulo <a class="reference internal" href="#module-lib.settings" title="lib.settings"><tt class="xref py py-mod docutils literal"><span class="pre">lib.settings</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.postpolicy.Policy.reports">
+<tt class="descname">reports</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#Policy.reports"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.Policy.reports" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método que define uma ação de imprimir todos os endereços SMTP&#8217;s
+contidos na base e suas informações de expiração e contagem. Utiliza o
+método <a class="reference internal" href="#lib.postpolicy.SenderScore.reports" title="lib.postpolicy.SenderScore.reports"><tt class="xref py py-meth docutils literal"><span class="pre">SenderScore.reports()</span></tt></a> para o resgate das informações.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.postpolicy.Policy.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#Policy.run"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.Policy.run" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método que reescreve o método <a class="reference internal" href="#lib.daemon.Daemon.run" title="lib.daemon.Daemon.run"><tt class="xref py py-meth docutils literal"><span class="pre">lib.daemon.Daemon.run()</span></tt></a> para fazer        com que o Daemon realize as tarefas necessárias ao se passar o comando        <strong>start</strong>. O método abre o socket na porta 8888 e inicia os        trabalhadores que tratarão as conexões. Os trabalhadores são iniciados        instanciando objetos da classe <a class="reference internal" href="#lib.postpolicy.Worker" title="lib.postpolicy.Worker"><tt class="xref py py-class docutils literal"><span class="pre">Worker</span></tt></a> e invocando o método        <tt class="xref py py-meth docutils literal"><span class="pre">Worker.start()</span></tt>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lib.postpolicy.SenderScore">
+<em class="property">class </em><tt class="descclassname">lib.postpolicy.</tt><tt class="descname">SenderScore</tt><big>(</big><em>base</em><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#SenderScore"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.SenderScore" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Classe que desempenha todas as tarefas necessárias para o julgamento do
+SMTP remetente. Desde o resgate da reputação do SMTP via consulta DNS até
+o ingresso das informações na base utilizada para o armazenamento das
+informações.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parâmetros:</th><td class="field-body"><strong>base</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; caminho e nome da base utilizada para tratamento do serviços.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="lib.postpolicy.SenderScore.action">
+<tt class="descname">action</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#SenderScore.action"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.SenderScore.action" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método que define uma ação baseada nas informações recebidas pelo         Postfix. Obtem-se em resumo os seguintes retornos:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parâmetros:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; conjunto de informações passadas pelo Postfix para um        servidor de políticas</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Retorna:</th><td class="field-body"><dl class="docutils">
+<dt><em>action=dunno</em></dt>
+<dd>aceite para as informações passadas, liberando a entrega da                mensagem ao seu destino.</dd>
+<dt><em>action=421 sender score reputation = x, you are limited to xx             messages/hours in our policy, try again later</em></dt>
+<dd>retorno do código de erro SMTP 421, que indica <em>Service not                 available, closing transmission channel</em></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.postpolicy.SenderScore.ch_sender">
+<tt class="descname">ch_sender</tt><big>(</big><em>sender</em><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#SenderScore.ch_sender"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.SenderScore.ch_sender" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método que incrementa o valor de contagem de um servidor SMTP ou        reinicia sua contagem caso o tempo de expiração tenha sido completo.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parâmetros:</th><td class="field-body"><strong>sender</strong> &#8211; endereço ip do remetente.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.postpolicy.SenderScore.clean">
+<tt class="descname">clean</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#SenderScore.clean"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.SenderScore.clean" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método que deleta os registros de endereços de SMTP não vistos por
+mais de 6 horas.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.postpolicy.SenderScore.close">
+<tt class="descname">close</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#SenderScore.close"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.SenderScore.close" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método para fechar a conexão com o banco de dados.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.postpolicy.SenderScore.get_reputation">
+<tt class="descname">get_reputation</tt><big>(</big><em>sender</em><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#SenderScore.get_reputation"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.SenderScore.get_reputation" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método que recupera a reputação de um SMTP rementente através de uma        consulta DNS ao serviço SenderScore.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parâmetros:</th><td class="field-body"><strong>sender</strong> &#8211; endereço ip do remetente.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Retorna:</th><td class="field-body">reputação do SMTP ou None caso não exista um valor válido.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.postpolicy.SenderScore.get_sender">
+<tt class="descname">get_sender</tt><big>(</big><em>sender</em><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#SenderScore.get_sender"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.SenderScore.get_sender" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método que retorna uma tupla contendo o IP, a contagem e o tempo de        expiração da contagem para um servidor SMTP informado.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parâmetros:</th><td class="field-body"><strong>sender</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#tuple" title="(in Python v2.7)"><em>tuple</em></a>) &#8211; endereço ip do remetente.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Retorna:</th><td class="field-body">tupla com os valores para o SMTP remetente existentes na base</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.postpolicy.SenderScore.parser">
+<tt class="descname">parser</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#SenderScore.parser"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.SenderScore.parser" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Função que trata o conjunto de informações passadas pelo Postfix e        recupera informações necessárias para a classificação e resgate da        reputação do SMTP remetente.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parâmetros:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; conjunto de informações passadas pelo Postfix para um        servidor de políticas</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Retorna:</th><td class="field-body">IP do SMTP remetente ou None caso a informação seja inválida.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lib.postpolicy.SenderScore.reports">
+<tt class="descname">reports</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#SenderScore.reports"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.SenderScore.reports" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método que exibe no terminal um relatório da contagem e do tempo de
+expiração dos SMTPS relacionados.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lib.postpolicy.Worker">
+<em class="property">class </em><tt class="descclassname">lib.postpolicy.</tt><tt class="descname">Worker</tt><big>(</big><em>socket</em>, <em>pid</em><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#Worker"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.Worker" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">multiprocessing.process.Process</span></tt></p>
+<p>Classe que extende a classe <a class="reference external" href="http://docs.python.org/library/multiprocessing.html#multiprocessing.Process" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">multiprocessing.Process</span></tt></a> e que define    os passos que cada uma das threads do Daemon realizará ao receber uma    conexão. Ela instancia a classe <a class="reference internal" href="#lib.postpolicy.SenderScore" title="lib.postpolicy.SenderScore"><tt class="xref py py-class docutils literal"><span class="pre">SenderScore</span></tt></a> que manipula os dados    obtidos através do Postfix e responde uma ação devida através do socket.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parâmetros:</th><td class="field-body"><ul class="first last simple">
+<li><strong>socket</strong> (<tt class="xref py py-meth docutils literal"><span class="pre">socket.socket()</span></tt>) &#8211; socket instanciado. Cada uma das instâncias das threads    recebe dados deste socket e os trata.</li>
+<li><strong>pid</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; pid do processo pai. Cada thread possui como critério de saída    a inexistência do processo pai, que é identificado por este valor     informado.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="lib.postpolicy.Worker.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/lib/postpolicy.html#Worker.run"><span class="viewcode-link">[código fonte]</span></a><a class="headerlink" href="#lib.postpolicy.Worker.run" title="Link permanente para esta definição">¶</a></dt>
+<dd><p>Método reescrito para fazer com que a thread receba os dados passados        via socket pelo Postfix e responda através deste socket a ação a ser        tomada pelo SMTP. A ação é recuperada através do método         <a class="reference internal" href="#lib.postpolicy.SenderScore.action" title="lib.postpolicy.SenderScore.action"><tt class="xref py py-meth docutils literal"><span class="pre">SenderScore.action()</span></tt></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-lib.settings">
+<span id="modulo-settings"></span><h2>Módulo <tt class="xref py py-mod docutils literal"><span class="pre">settings</span></tt><a class="headerlink" href="#module-lib.settings" title="Link permanente para este título">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Plataforma:</th><td class="field-body">*nix</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Sinopse:</th><td class="field-body">Módulo que possuí parâmetros de configuração para uso do servidor de políticas.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="parametros">
+<h3>Parâmetros<a class="headerlink" href="#parametros" title="Link permanente para este título">¶</a></h3>
+<dl class="docutils">
+<dt><strong>PROCS</strong></dt>
+<dd>número de threads que será utilizadas para receber conexões TCP/IP no servidor de políticas.</dd>
+<dt><strong>MULT</strong></dt>
+<dd>lembrando que as reputações obtidas no SenderScore variam entre1 e 100, o valor deste parâmetro faz com que o valor obtido seja multiplicado.Caso seja obtido um valor de reputação igual a 88 e o valor de MULT igual a 3,o limite de envios para o prazo de uma hora estaria restrito a no máximo 264.</dd>
+<dt><strong>DBPATH</strong></dt>
+<dd>indica o caminho que será utilizado para armazenamento da base SQLite utilizada para guardar as informações obtidas.</dd>
+<dt><strong>LOGS</strong></dt>
+<dd>indica o caminho que será utilizado para armazenar os arquivos de log.</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Tabela de Conteúdo</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Pacote lib</a><ul>
+<li><a class="reference internal" href="#id1">Pacote <tt class="docutils literal"><span class="pre">lib</span></tt></a></li>
+<li><a class="reference internal" href="#module-lib.daemon">Módulo <tt class="docutils literal"><span class="pre">daemon</span></tt></a><ul>
+<li><a class="reference internal" href="#codigo">Código</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-lib.postpolicy">Módulo <tt class="docutils literal"><span class="pre">postpolicy</span></tt></a><ul>
+<li><a class="reference internal" href="#id2">Código</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-lib.settings">Módulo <tt class="docutils literal"><span class="pre">settings</span></tt></a><ul>
+<li><a class="reference internal" href="#parametros">Parâmetros</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Tópico anterior</h4>
+  <p class="topless"><a href="modules.html"
+                        title="capítulo anterior">PostPolicy</a></p>
+  <h4>Próximo tópico</h4>
+  <p class="topless"><a href="main.html"
+                        title="próximo capítulo">Modulo main</a></p>
+  <h3>Esta Página</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/lib.txt"
+           rel="nofollow">Exibir Fonte</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Pesquisa rápida</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Ir" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Digite os termos da busca ou o nome de um módulo, classe ou função.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navegação</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="Índice Geral"
+             >índice</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Índice de Módulos do Python"
+             >módulos</a> |</li>
+        <li class="right" >
+          <a href="main.html" title="Modulo main"
+             >próximo</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="PostPolicy"
+             >anterior</a> |</li>
+        <li><a href="index.html">PostPolicy b1 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >PostPolicy</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Ronaldo Alves Marques Júnior.
+      Criado com <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

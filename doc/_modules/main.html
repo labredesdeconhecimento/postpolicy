@@ -1,0 +1,157 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>main &mdash; PostPolicy b1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'b1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PostPolicy b1 documentation" href="../index.html" />
+    <link rel="up" title="Código do módulo" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navegação</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="Índice Geral"
+             accesskey="I">índice</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Índice de Módulos do Python"
+             >módulos</a> |</li>
+        <li><a href="../index.html">PostPolicy b1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Código do módulo</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Código fonte de main</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+<span class="c">#coding: utf-8</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">###############</span>
+<span class="sd">Módulo *main*</span>
+<span class="sd">###############</span>
+
+<span class="sd">    :Plataforma: \*nix</span>
+<span class="sd">    :Sinopse: Módulo principal do projeto que instancia o objeto da classe \</span>
+<span class="sd">Policy que gerencia toda a estrutura do Daemon.</span>
+
+<span class="sd">.. moduleauthor:: Ronaldo A. Marques Jr. &lt;ralvesmj@gmail.com&gt;</span>
+
+<span class="sd">Argumentos</span>
+<span class="sd">----------</span>
+
+<span class="sd">.. cmdoption:: comando</span>
+
+<span class="sd">    Comando a ser passado para o daemon</span>
+
+<span class="sd">Código</span>
+<span class="sd">------</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">lib.postpolicy</span> <span class="kn">import</span> <span class="n">Policy</span>
+<span class="kn">from</span> <span class="nn">lib.settings</span> <span class="kn">import</span> <span class="n">LOGS</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">ArgumentTypeError</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="nb">exit</span>
+
+
+<div class="viewcode-block" id="commands"><a class="viewcode-back" href="../main.html#main.commands">[documentos]</a><span class="k">def</span> <span class="nf">commands</span><span class="p">(</span><span class="n">comando</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Função que checa o comando informado a ser interpretado pelo Daemon.</span>
+<span class="sd">    Através de um método da classe Policy, determinada tarefa do Daemon</span>
+<span class="sd">    é executada.</span>
+
+<span class="sd">    :param comando: comando a ser executado pelo daemon.</span>
+<span class="sd">    :type p: str</span>
+<span class="sd">    :returns: Executa uma tarefa específica para o Daemon.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">comando</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">,</span> <span class="s">&#39;stop&#39;</span><span class="p">,</span> <span class="s">&#39;status&#39;</span><span class="p">,</span> <span class="s">&#39;reports&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="n">ArgumentTypeError</span><span class="p">(</span><span class="s">&#39;Comando desconhecido&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">comando</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">daemon</span> <span class="o">=</span> <span class="n">Policy</span><span class="p">(</span><span class="s">&#39;/tmp/policy.pid&#39;</span><span class="p">,</span>
+                    <span class="n">stdout</span><span class="o">=</span><span class="s">&#39;{}/postpolicy.log&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">LOGS</span><span class="p">),</span>
+                    <span class="n">stderr</span><span class="o">=</span><span class="s">&#39;{}/postpolicy.err.log&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">LOGS</span><span class="p">))</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;comando&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Comando para o daemon&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">commands</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comando</span> <span class="o">==</span> <span class="s">&#39;start&#39;</span><span class="p">:</span>
+        <span class="n">daemon</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">comando</span> <span class="o">==</span> <span class="s">&#39;stop&#39;</span><span class="p">:</span>
+        <span class="n">daemon</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">comando</span> <span class="o">==</span> <span class="s">&#39;status&#39;</span><span class="p">:</span>
+        <span class="n">daemon</span><span class="o">.</span><span class="n">status</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">comando</span> <span class="o">==</span> <span class="s">&#39;reports&#39;</span><span class="p">:</span>
+        <span class="n">daemon</span><span class="o">.</span><span class="n">reports</span><span class="p">()</span>
+    <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Pesquisa rápida</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Ir" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Digite os termos da busca ou o nome de um módulo, classe ou função.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navegação</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="Índice Geral"
+             >índice</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Índice de Módulos do Python"
+             >módulos</a> |</li>
+        <li><a href="../index.html">PostPolicy b1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Código do módulo</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Ronaldo Alves Marques Júnior.
+      Criado com <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

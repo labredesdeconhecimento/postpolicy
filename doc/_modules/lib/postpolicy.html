@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lib.postpolicy &mdash; PostPolicy b1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     'b1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PostPolicy b1 documentation" href="../../index.html" />
+    <link rel="up" title="Código do módulo" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navegação</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="Índice Geral"
+             accesskey="I">índice</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Índice de Módulos do Python"
+             >módulos</a> |</li>
+        <li><a href="../../index.html">PostPolicy b1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Código do módulo</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Código fonte de lib.postpolicy</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+<span class="c">#coding: utf-8</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">.. moduleauthor:: Ronaldo A. Marques Jr. &lt;ralvesmj@gmail.com&gt;</span>
+<span class="sd">:Plataforma: \*nix</span>
+<span class="sd">:Sinopse: Módulo que possuí praticamente todo o código desenvolvido para \</span>
+<span class="sd">uso do Daemon. Existem três classes que gerenciam a alma da solução.</span>
+
+<span class="sd">- A classe :class:`Worker`, que controla as threads utilizadas pela classe \</span>
+<span class="sd">:class:`Policy`.</span>
+<span class="sd">- A classe :class:`Policy`, reescreve o método :meth:`lib.daemon.Daemon.run` \</span>
+<span class="sd">da classe :class:`lib.daemon.Daemon` e define o que deve ser feito quando o \</span>
+<span class="sd">Daemon inicia.</span>
+<span class="sd">- A classe :class:`SenderScore`, faz toda a avaliação do servidor que está \</span>
+<span class="sd">enviando a mensagem (um servidor SMTP) e define uma ação para o mesmo. Esta \</span>
+<span class="sd">ação quando passada a um servidor Postfix garante a entrega do email ou a \</span>
+<span class="sd">emissão de um erro temporário.</span>
+
+<span class="sd">Código</span>
+<span class="sd">------</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">daemon</span> <span class="kn">import</span> <span class="n">Daemon</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">strftime</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">getpid</span><span class="p">,</span> <span class="n">getppid</span><span class="p">,</span> <span class="n">fdopen</span>
+<span class="kn">from</span> <span class="nn">dns.resolver</span> <span class="kn">import</span> <span class="n">query</span><span class="p">,</span> <span class="n">NXDOMAIN</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+
+
+<div class="viewcode-block" id="Worker"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.Worker">[documentos]</a><span class="k">class</span> <span class="nc">Worker</span><span class="p">(</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Classe que extende a classe :class:`multiprocessing.Process` e que define\</span>
+<span class="sd">    os passos que cada uma das threads do Daemon realizará ao receber uma\</span>
+<span class="sd">    conexão. Ela instancia a classe :class:`SenderScore` que manipula os dados\</span>
+<span class="sd">    obtidos através do Postfix e responde uma ação devida através do socket.</span>
+
+<span class="sd">    :param socket: socket instanciado. Cada uma das instâncias das threads\</span>
+<span class="sd">    recebe dados deste socket e os trata.</span>
+<span class="sd">    :type socket: :meth:`socket.socket`</span>
+<span class="sd">    :param pid: pid do processo pai. Cada thread possuí como critério de saída\</span>
+<span class="sd">    a inexistência do processo pai, que identificado por este valor informado.</span>
+<span class="sd">    :type pid: int</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">socket</span><span class="p">,</span> <span class="n">pid</span><span class="p">):</span>
+        <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket</span> <span class="o">=</span> <span class="n">socket</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppid</span> <span class="o">=</span> <span class="n">pid</span>
+
+<div class="viewcode-block" id="Worker.run"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.Worker.run">[documentos]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método reescrito para fazer com que a thread receba os dados passados\</span>
+<span class="sd">        via socket pelo Postfix e responda através deste socket a ação a ser\</span>
+<span class="sd">        tomada pelo SMTP.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">fdopen</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">fileno</span><span class="p">(),</span> <span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">SenderScore</span><span class="p">(</span><span class="s">&#39;{}/local.db&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">DBPATH</span><span class="p">))</span>
+        <span class="k">while</span> <span class="n">getppid</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ppid</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">con</span><span class="p">,</span> <span class="n">ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">2048</span><span class="p">)</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">con</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+                <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+                <span class="k">continue</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="Policy"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.Policy">[documentos]</a><span class="k">class</span> <span class="nc">Policy</span><span class="p">(</span><span class="n">Daemon</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Classe que extende a classe :class:`Daemon` e que define\</span>
+<span class="sd">    os operações básicas para o Daemon. Ações como parar, iniciar, verificar\</span>
+<span class="sd">    o estado e outros são realizados. Parâmetros para sua instanciação.</span>
+
+<span class="sd">    :param pidfile: arquivo que guarda o pid do processo.</span>
+<span class="sd">    :type pidfile: str</span>
+<span class="sd">    :param stdin: valor que especifica o caminho do arquivo que guardará\</span>
+<span class="sd">    informações a serem passadas como entrada para o Daemon.</span>
+<span class="sd">    :type stdin: str</span>
+<span class="sd">    :param stdout: valor que especifica o caminho do arquivo que guardará\</span>
+<span class="sd">    informações de saída do Daemon.</span>
+<span class="sd">    :type stdout: str</span>
+<span class="sd">    :param stderr: valor que especifica o caminho do arquivo que guardará\</span>
+<span class="sd">    informações de saída de erro do Daemon.</span>
+<span class="sd">    :type stderr: str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pidfile</span><span class="p">,</span> <span class="n">stdin</span><span class="o">=</span><span class="s">&#39;/dev/null&#39;</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="s">&#39;/dev/null&#39;</span><span class="p">,</span>
+                 <span class="n">stderr</span><span class="o">=</span><span class="s">&#39;/dev/null&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkconfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdin</span> <span class="o">=</span> <span class="n">stdin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pidfile</span> <span class="o">=</span> <span class="n">pidfile</span>
+
+<div class="viewcode-block" id="Policy.run"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.Policy.run">[documentos]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método que reescreve o método :meth:`Daemon.run` para fazer com que o\</span>
+<span class="sd">        Daemon realize as tarefas necessárias ao se passar o comando *start*.</span>
+<span class="sd">        O método abre o socket na porta 8888 e inicia os trabalhadores que\</span>
+<span class="sd">        tratarão as conexões. Os trabalhadores são iniciados instanciando\</span>
+<span class="sd">        objetos da classe :class:`Worker` e invocando o método\</span>
+<span class="sd">        :meth:`Worker.start`.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mi">8888</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">PROCS</span><span class="p">):</span>
+            <span class="n">mp</span> <span class="o">=</span> <span class="n">Worker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="p">,</span> <span class="n">getpid</span><span class="p">())</span>
+            <span class="n">mp</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">SenderScore</span><span class="p">(</span><span class="s">&#39;{}/local.db&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">DBPATH</span><span class="p">))</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">base</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">3600</span><span class="p">)</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Policy.reports"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.Policy.reports">[documentos]</a>    <span class="k">def</span> <span class="nf">reports</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método que define uma ação de imprimir todos os endereços SMTP&#39;s</span>
+<span class="sd">        contidos na base e suas informações de expiração e contagem. Utiliza o</span>
+<span class="sd">        método :meth:`SenderScore.reports` para o resgate das informações.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">SenderScore</span><span class="p">(</span><span class="s">&#39;{}/local.db&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">DBPATH</span><span class="p">))</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">reports</span><span class="p">()</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Policy.checkconfig"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.Policy.checkconfig">[documentos]</a>    <span class="k">def</span> <span class="nf">checkconfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método para tratar os valores e a integridade das variáveis definidas</span>
+<span class="sd">        no :mod:`lib.settings`.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MULT</span><span class="p">)</span> <span class="ow">is</span> <span class="n">types</span><span class="o">.</span><span class="n">IntType</span><span class="p">,</span> <span class="s">&#39;MULT is not a integer&#39;</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PROCS</span><span class="p">)</span> <span class="ow">is</span> <span class="n">types</span><span class="o">.</span><span class="n">IntType</span><span class="p">,</span> <span class="s">&#39;PROCS is not a integer&#39;</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">DBPATH</span><span class="p">)</span> <span class="ow">is</span> <span class="n">types</span><span class="o">.</span><span class="n">StringType</span><span class="p">,</span> <span class="s">&#39;DBPATH is not a string&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">DBPATH</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">W_OK</span><span class="p">):</span>
+                <span class="k">raise</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">(</span><span class="s">&#39;The path </span><span class="si">%s</span><span class="s"> is not writable&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">DBPATH</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOGS</span><span class="p">)</span> <span class="ow">is</span> <span class="n">types</span><span class="o">.</span><span class="n">StringType</span><span class="p">,</span> <span class="s">&#39;LOGS is not a string&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOGS</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">W_OK</span><span class="p">):</span>
+                <span class="k">raise</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">(</span><span class="s">&#39;The path </span><span class="si">%s</span><span class="s"> is not writable&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOGS</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="SenderScore"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.SenderScore">[documentos]</a><span class="k">class</span> <span class="nc">SenderScore</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Classe que desempenha todas as tarefas necessárias para o julgamento do</span>
+<span class="sd">    SMTP remetente. Desde o resgate da reputação do SMTP via consulta DNS até</span>
+<span class="sd">    o ingresso das informações na base utilizada para o armazenamento das</span>
+<span class="sd">    informações.</span>
+
+<span class="sd">    :param base: caminho e nome da base utilizada para tratamento do serviços.</span>
+<span class="sd">    :type base: str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__con</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="sd">&#39;&#39;&#39; CREATE  TABLE  IF NOT EXISTS score (</span>
+<span class="sd">        ip text PRIMARY KEY  NOT NULL,</span>
+<span class="sd">        count INTEGER NOT NULL  DEFAULT 0,</span>
+<span class="sd">        expiration FLOAT NOT NULL)&#39;&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SenderScore.get_reputation"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.SenderScore.get_reputation">[documentos]</a>    <span class="k">def</span> <span class="nf">get_reputation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método que recupera a reputação de um SMTP rementente através de uma\</span>
+<span class="sd">        consulta DNS ao serviço SenderScore.</span>
+
+<span class="sd">        :param sender: endereço ip do remetente.</span>
+<span class="sd">        :type data: str</span>
+<span class="sd">        :returns: valor da reputação ou None caso o mais não tenha um valor\</span>
+<span class="sd">        válido.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">sender</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">sender</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="s">&#39;{}.score.senderscore.com&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sender</span><span class="p">),</span>
+                         <span class="s">&#39;A&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">except</span> <span class="n">NXDOMAIN</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="SenderScore.ch_sender"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.SenderScore.ch_sender">[documentos]</a>    <span class="k">def</span> <span class="nf">ch_sender</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método que incrementa o valor de contagem de um servidor SMTP ou\</span>
+<span class="sd">        reinicia sua contagem caso o tempo de expiração tenha sido completo.</span>
+
+<span class="sd">        :param sender: endereço ip do remetente.</span>
+<span class="sd">        :type data: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;&#39;&#39;SELECT * FROM score WHERE ip = ?&#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">resultado</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+        <span class="n">hora</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resultado</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;&#39;&#39;INSERT INTO score (ip, count, expiration)</span>
+<span class="s">                                    VALUES (?,?,?)&#39;&#39;&#39;</span><span class="p">,</span>
+                                    <span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">strftime</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">hora</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())))</span>
+            <span class="k">elif</span> <span class="n">resultado</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span>
+                                                  <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())):</span>
+                <span class="k">print</span> <span class="n">strftime</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">hora</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()),</span> <span class="n">sender</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;&#39;&#39;UPDATE score</span>
+<span class="s">                                    SET count = 1, expiration = ?</span>
+<span class="s">                                    WHERE ip = ?&#39;&#39;&#39;</span><span class="p">,</span>
+                                    <span class="p">(</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">hora</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()),</span> <span class="n">sender</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;&#39;&#39;UPDATE score</span>
+<span class="s">                                    SET count = count+1</span>
+<span class="s">                                    WHERE ip =?&#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__con</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SenderScore.get_sender"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.SenderScore.get_sender">[documentos]</a>    <span class="k">def</span> <span class="nf">get_sender</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método que retorna uma tupla contendo o IP, a contagem e o tempo de\</span>
+<span class="sd">        expiração da contagem para um servidor SMTP informado.</span>
+
+<span class="sd">        :param sender: endereço ip do remetente.</span>
+<span class="sd">        :type data: tuple</span>
+<span class="sd">        :returns: tupla com os valores para o SMTP remetente existentes na base</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;&#39;&#39;SELECT ip, count, expiration</span>
+<span class="s">                            FROM score where ip = ?&#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">sender</span><span class="p">,))</span>
+        <span class="n">linhas</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">linhas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">linhas</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">linhas</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="SenderScore.parser"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.SenderScore.parser">[documentos]</a>    <span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Função que trata o conjunto de informações passadas pelo Postfix e\</span>
+<span class="sd">        recupera informações necessárias para a classificação e resgate da\</span>
+<span class="sd">        reputação do SMTP remetente.</span>
+
+<span class="sd">        :param data: conjunto de informações passadas pelo Postfix para um\</span>
+<span class="sd">        servidor de políticas</span>
+<span class="sd">        :type data: str</span>
+<span class="sd">        :returns: IP do SMTP remetente ou None caso a informação seja inválida.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sender</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+                <span class="n">chave</span><span class="p">,</span> <span class="n">valor</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">chave</span> <span class="o">==</span> <span class="s">&#39;client_address&#39;</span><span class="p">:</span>
+                    <span class="n">sender</span> <span class="o">=</span> <span class="n">valor</span>
+                    <span class="k">break</span>
+            <span class="k">return</span> <span class="n">sender</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="SenderScore.clean"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.SenderScore.clean">[documentos]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método que deleta os registros de endereços de SMTP não vistos por</span>
+<span class="sd">        mais de 6 horas.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">hora</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;DELETE FROM score where expiration &lt; ?&#39;</span><span class="p">,</span>
+                       <span class="p">(</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">hora</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()),))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SenderScore.close"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.SenderScore.close">[documentos]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método para fechar a conexão com o banco de dados.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SenderScore.reports"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.SenderScore.reports">[documentos]</a>    <span class="k">def</span> <span class="nf">reports</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mx</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método que exibe no terminal um relatório da contagem e do tempo de</span>
+<span class="sd">        expiração dos SMTPS relacionados.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;SELECT * FROM score&#39;</span><span class="p">)</span>
+        <span class="n">linhas</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">linhas</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">{}</span><span class="se">\t\t\t</span><span class="s">{}</span><span class="se">\t</span><span class="s">{}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;IP&#39;</span><span class="p">,</span> <span class="s">&#39;Counting&#39;</span><span class="p">,</span> <span class="s">&#39;Expire&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">linhas</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;{}</span><span class="se">\t\t</span><span class="s">{}</span><span class="se">\t\t</span><span class="s">{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SenderScore.action"><a class="viewcode-back" href="../../lib.html#lib.postpolicy.SenderScore.action">[documentos]</a>    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Método que define baseado nas informações recebidas pelo Postfix.</span>
+<span class="sd">        Obtem-se em resumo os seguintes retornos:</span>
+
+<span class="sd">        :param data: conjunto de informações passadas pelo Postfix para um\</span>
+<span class="sd">        servidor de políticas</span>
+<span class="sd">        :type data: str</span>
+<span class="sd">        :returns:</span>
+<span class="sd">            action=dunno</span>
+<span class="sd">                aceite para as informações passadas, liberando a entrega da\</span>
+<span class="sd">                mensagem ao seu destino.</span>
+<span class="sd">            action=421 *MSG*</span>
+<span class="sd">                retorno do código de erro SMTP 421, que indica *Service not \</span>
+<span class="sd">                available, closing transmission channel*</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">sender</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sender</span><span class="p">:</span>
+            <span class="n">rep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reputation</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">rep</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ch_sender</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span>
+                <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sender</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">stats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">rep</span><span class="p">)</span> <span class="o">*</span> <span class="n">settings</span><span class="o">.</span><span class="n">MULT</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;action=421 sender score reputation = {0}, &#39;</span>\
+                            <span class="s">&#39;you are limited to {1} messages/hours &#39;</span>\
+                            <span class="s">&#39;in our policy, try again later</span><span class="se">\n\n</span><span class="s">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">rep</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">rep</span><span class="p">)</span> <span class="o">*</span> <span class="n">settings</span><span class="o">.</span><span class="n">MULT</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">msg</span>
+        <span class="k">return</span> <span class="s">&#39;action=dunno</span><span class="se">\n\n</span><span class="s">&#39;</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Pesquisa rápida</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Ir" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Digite os termos da busca ou o nome de um módulo, classe ou função.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navegação</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="Índice Geral"
+             >índice</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Índice de Módulos do Python"
+             >módulos</a> |</li>
+        <li><a href="../../index.html">PostPolicy b1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Código do módulo</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Ronaldo Alves Marques Júnior.
+      Criado com <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

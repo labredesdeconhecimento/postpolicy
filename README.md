@@ -15,10 +15,15 @@ a contagem máxima.
 >Expirado este tempo a contagem é retomada em 0, criando-se assim um meio de evitar o 
 desperdício de recursos caso sofra-se excessos a partir de um servidor SMTP comprometido.
 
+Dependência
+-----------
+A aplicação depende da linguagem Python com suporte a base de dados SQLite e do módulo de terceiros
+dnspython.
+
 Uso
 ----
 > Assim como daemon, o arquivo main.py aceita comandos como start, stop, status e reports. O reports,
-não comum como os demais, exibe um relatório com informações dos SMTPS contidos na base.
+não comum como os demais, exibe um relatório com informações dos SMTP's contidos na base.
 >
 `python main.py start` 
 

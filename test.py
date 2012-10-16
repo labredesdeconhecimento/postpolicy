@@ -64,6 +64,6 @@ encryption_keysize=256
     print base.get_reputation('200.202.246.144')  # unipac
     print base.get_reputation('200.243.63.174')  # funjob
     print base.get_reputation('189.124.16.8')  # net-rosas
-    for x in xrange(1000):
+    for x in xrange(300):
         print base.action(data)
         print base.action(data2)

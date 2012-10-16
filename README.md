@@ -17,7 +17,7 @@ desperdício de recursos caso sofra-se excessos a partir de um servidor SMTP com
 
 Dependência
 -----------
-A aplicação depende da linguagem Python com suporte a base de dados SQLite e do módulo de terceiros
+> A aplicação depende da linguagem Python com suporte a base de dados SQLite e do módulo de terceiros
 dnspython.
 
 Uso

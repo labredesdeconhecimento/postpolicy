@@ -213,7 +213,6 @@ class SenderScore:
                                      strftime('%s', hora.timetuple())))
             elif resultado[0][2] < float(strftime('%s',
                                                   datetime.now().timetuple())):
-                print strftime('%s', hora.timetuple()), sender
                 cursor.execute('''UPDATE score
                                     SET count = 1, expiration = ?
                                     WHERE ip = ?''',

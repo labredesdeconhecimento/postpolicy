@@ -142,14 +142,16 @@ class Policy(Daemon):
         no módulo :mod:`lib.settings`.
         '''
         try:
-            assert type(settings.MULT) is types.IntType, 'MULT is not a integer'
-            assert type(settings.PROCS) is types.IntType, 'PROCS is not a integer'
-            assert type(settings.DBPATH) is types.StringType, 'DBPATH is not a string'
+            assert isinstance(settings.MULT, int), 'MULT is not a integer'
+            assert isinstance(settings.PROCS, int), 'PROCS is not a integer'
+            assert isinstance(settings.DBPATH, str), 'DBPATH is not a string'
             if not os.access(settings.DBPATH, os.W_OK):
-                raise(AssertionError('The path %s is not writable' % settings.DBPATH))
-            assert type(settings.LOGS) is types.StringType, 'LOGS is not a string'
+                raise(AssertionError('The path %s is not writable' %
+                                     settings.DBPATH))
+            assert isinstance(settings.LOGS, str), 'LOGS is not a string'
             if not os.access(settings.LOGS, os.W_OK):
-                raise(AssertionError('The path %s is not writable' % settings.LOGS))
+                raise(AssertionError('The path %s is not writable' %
+                                     settings.LOGS))
         except AssertionError as e:
             print str(e)
             sys.exit(1)
@@ -170,10 +172,10 @@ class SenderScore:
         self.__con = sqlite3.connect(base)
         cursor = self.__con.cursor()
         cursor.execute(
-        ''' CREATE  TABLE  IF NOT EXISTS score (
-        ip text PRIMARY KEY  NOT NULL,
-        count INTEGER NOT NULL  DEFAULT 0,
-        expiration FLOAT NOT NULL)''')
+            ''' CREATE  TABLE  IF NOT EXISTS score (
+            ip text PRIMARY KEY  NOT NULL,
+            count INTEGER NOT NULL  DEFAULT 0,
+            expiration FLOAT NOT NULL)''')
         self.__con.commit()
 
     def get_reputation(self, sender):
@@ -208,15 +210,15 @@ class SenderScore:
         try:
             if len(resultado) == 0:
                 cursor.execute('''INSERT INTO score (ip, count, expiration)
-                                    VALUES (?,?,?)''',
-                                    (sender, 1,
-                                     strftime('%s', hora.timetuple())))
+                               VALUES (?,?,?)''',
+                               (sender, 1,
+                               strftime('%s', hora.timetuple())))
             elif resultado[0][2] < float(strftime('%s',
                                                   datetime.now().timetuple())):
                 cursor.execute('''UPDATE score
-                                    SET count = 1, expiration = ?
-                                    WHERE ip = ?''',
-                                    (strftime('%s', hora.timetuple()), sender))
+                               SET count = 1, expiration = ?
+                               WHERE ip = ?''',
+                               (strftime('%s', hora.timetuple()), sender))
             else:
                 cursor.execute('''UPDATE score
                                     SET count = count+1
@@ -321,8 +323,8 @@ class SenderScore:
                 stats = self.get_sender(sender)
                 if stats[1] > int(rep) * settings.MULT:
                     msg = 'action=421 sender score reputation = {0}, '\
-                            'you are limited to {1} messages/hours '\
-                            'in our policy, try again later\n\n'''.format(
-                            rep, int(rep) * settings.MULT)
+                          'you are limited to {1} messages/hours '\
+                          'in our policy, try again later\n\n'''.format(
+                          rep, int(rep) * settings.MULT)
                     return msg
         return 'action=dunno\n\n'

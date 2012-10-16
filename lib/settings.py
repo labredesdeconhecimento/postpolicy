@@ -3,7 +3,7 @@
 '''
 .. moduleauthor:: Ronaldo A. Marques Jr. <ralvesmj@gmail.com>
 :Plataforma: \*nix
-:Sinopse: Módulo que possuí parâmetros de configuração para uso do servidor de \
+:Sinopse: Módulo que possuí parâmetros de configuração para uso do servidor de\
 políticas.
 
 Parâmetros

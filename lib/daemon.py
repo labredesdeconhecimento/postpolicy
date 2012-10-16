@@ -5,9 +5,9 @@
 .. _Python: http://www.python.org/
 .. moduleauthor:: Sander Marechal
 :Plataforma: \*nix
-:Sinopse: Módulo disponível em Jejik_ que implementa uma classe para criação de\
- um Daemon utilizando Python_. Seu autor, Sander Marechal, liberou seu uso sob\
-licença Creative Commons.
+:Sinopse: Módulo disponível em Jejik_ que implementa uma classe para criação \
+de um Daemon utilizando Python_. Seu autor, Sander Marechal, liberou seu uso \
+sob licença Creative Commons.
 
 Código
 ------
@@ -165,7 +165,8 @@ class Daemon:
             procfile = file("/proc/%d/status" % pid, 'r')
             procfile.close()
         except IOError:
-            sys.stdout.write("there is not a process with the PID specified in %s\n" 
+            sys.stdout.write("there is not a process with the "
+                             "PID specified in %s\n"
                              % self.pidfile)
             sys.exit(0)
         except TypeError:
